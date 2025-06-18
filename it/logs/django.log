@@ -4339,3 +4339,12 @@ INFO 2025-06-18 23:02:46,320 autoreload 7944 5148 Watching for file changes with
 INFO 2025-06-18 23:03:19,573 autoreload 9204 15092 Watching for file changes with StatReloader
 INFO 2025-06-18 23:03:34,232 autoreload 9204 15092 C:\Users\Aza\Downloads\Telegram Desktop\it\it\users\views.py changed, reloading.
 INFO 2025-06-18 23:03:35,556 autoreload 18252 12164 Watching for file changes with StatReloader
+INFO 2025-06-18 23:03:37,438 basehttp 18252 17784 "GET /sw.js HTTP/1.1" 200 1081
+INFO 2025-06-18 23:03:39,774 basehttp 18252 17784 "GET /login/ HTTP/1.1" 200 4485
+INFO 2025-06-18 23:03:41,358 basehttp 18252 17784 "GET /sw.js HTTP/1.1" 200 1081
+INFO 2025-06-18 23:03:46,668 basehttp 18252 17784 "POST /login/ HTTP/1.1" 302 0
+INFO 2025-06-18 23:03:46,686 basehttp 18252 17784 "GET /now_user HTTP/1.1" 200 2239
+WARNING 2025-06-18 23:03:46,723 basehttp 18252 17784 "GET /static/js/redirect.js HTTP/1.1" 404 179
+INFO 2025-06-18 23:03:48,301 basehttp 18252 17784 "GET /sw.js HTTP/1.1" 200 1081
+INFO 2025-06-18 23:11:17,196 autoreload 18252 12164 C:\Users\Aza\Downloads\Telegram Desktop\it\it\it\settings.py changed, reloading.
+INFO 2025-06-18 23:11:18,230 autoreload 5244 19872 Watching for file changes with StatReloader
