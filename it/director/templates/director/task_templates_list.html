@@ -1,0 +1,307 @@
+{% extends 'director/layout.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="header-section">
+        <h2>Шаблоны задач</h2>
+        <a href="/director/templates/create/?photo_id=1" class="btn btn-primaryy">Назад</a>
+        <a href="{% url 'create_task_template' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Создать шаблон
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if templates %}
+    <div class="templates-grid">
+        {% for template in templates %}
+        <div class="template-card">
+            <div class="template-header">
+                <h3>{{ template.title }}</h3>
+                <span class="max-users">
+                    <i class="fas fa-users"></i> Макс. пользователей: {{ template.max_assigned_users }}
+                </span>
+            </div>
+
+            <div class="template-info">
+                <div class="date-info">
+                    <i class="fas fa-calendar"></i> Создан: {{ template.created_at|date:"d.m.Y" }}
+                </div>
+                {% if template.is_public %}
+                <div class="public-badge">
+                    <i class="fas fa-globe"></i> Публичный шаблон
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="template-description">
+                Описание: {{ template.description|truncatechars:150 }}
+            </div>
+
+            <div class="template-actions">
+                <a href="{% url 'edit_task_template' template.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> Редактировать
+                </a>
+                <form method="post" action="{% url 'delete_task_template' template.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Вы уверены, что хотите удалить шаблон \"{{ template.title }}\"?')">
+                        <i class="fas fa-trash"></i> Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-clipboard-list"></i>
+        <h3>Нет доступных шаблонов</h3>
+        <p>Создайте свой первый шаблон задачи, чтобы ускорить процесс создания задач</p>
+        <a href="{% url 'create_task_template' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Создать шаблон
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-section h2 {
+        margin: 0;
+        color: white;
+    }
+
+    .templates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .template-card {
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        transition: transform 0.2s ease;
+    }
+
+    .template-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .template-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .template-header h3 {
+        margin: 0;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .max-users {
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .template-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: white;
+    }
+
+    .creator-info, .date-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .public-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+    }
+
+    .template-description {
+        color: white;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        flex-grow: 1;
+    }
+
+    .template-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .template-actions .btn {
+        flex: 1;
+        min-width: 120px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #ccc;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        padding: 12px;
+    }
+
+    .btn-primary {
+        background: black;
+        color: white;
+        border: none;
+    }
+
+    .btn-primaryy:hover {
+        background: white;
+        color: black;
+    }
+
+    .btn-primaryy {
+       background: white;
+        color: black;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: black;
+        color: white;
+    }
+
+    .btn-outline-primary {
+        background: black;
+        border: 1px solid #007bff;
+        color: #007bff;
+    }
+
+    .btn-outline-primary:hover {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-outline-danger {
+        background: black;
+        border: 1px solid #dc3545;
+        color: #dc3545;
+        width: 99%;
+    }
+
+    .btn-outline-danger:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        .header-section {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .templates-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .template-card {
+            padding: 1rem;
+        }
+
+        .template-actions {
+            flex-direction: column;
+        }
+
+
+        .template-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .template-info {
+            font-size: 0.85rem;
+        }
+
+        .template-description {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}

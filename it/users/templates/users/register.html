@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="main">
+    <div class="registration-form">
+        <h1>Создать</h1>
+        <h2>учётную запись</h2>
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.full_name }}
+                {% if form.full_name.errors %}
+                <div class="error-message">{{ form.full_name.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="error-message">{{ form.email.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.phone_number }}
+                {% if form.phone_number.errors %}
+                <div class="error-message">{{ form.phone_number.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.date_of_birth }}
+                {% if form.date_of_birth.errors %}
+                <div class="error-message">{{ form.date_of_birth.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <div class="input-with-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
+                        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+                    </svg>
+                    {{ form.password1 }}
+                </div>
+                {% if form.password1.errors %}
+                <div class="error-message">{{ form.password1.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <div class="input-with-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+                        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                    </svg>
+                    {{ form.password2 }}
+                </div>
+                {% if form.password2.errors %}
+                <div class="error-message">{{ form.password2.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            <div class="error-container">
+                {% if form.non_field_errors %}
+                <div class="error-message">
+                    {% for error in form.non_field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <button type="submit" class="submit-btn">Регистрация</button>
+        </form>
+        <div class="login-section">
+            <span class="login-link">У вас уже есть учетная запись?</span><br>
+            <a class="btn" href="{% url 'login' %}">Войти</a>
+        </div>
+    </div>
+</div>
+
+<style>
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+    background-image: url('/static/img/photo_2025-01-24_01-36-25.jpg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: hidden;
+}
+
+.main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    color: white;
+    position: relative;
+}
+
+.registration-form h1, .registration-form h2 {
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.registration-form h1 {
+    margin-top: -10%;
+    margin-bottom: -5%;
+    font-size: 35px;
+}
+
+.registration-form h2 {
+    margin-bottom: 60px;
+    font-size: 35px;
+}
+
+.registration-form {
+    width: 80%;
+}
+
+.form-group {
+    width: 100%;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-control {
+    padding: 15px;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid white;
+    background-color: rgba(0, 0, 0, 0.0);
+    color: white;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-bottom-color: #66CDAA;
+}
+
+.form-control::placeholder {
+    color: white;
+    opacity: 0.8;
+}
+
+/* Стили для полей пароля */
+input[type="password"] {
+    padding: 15px;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid white;
+    background-color: rgba(0, 0, 0, 0.0);
+    color: white;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="password"]:focus {
+    border-bottom-color: #66CDAA;
+}
+
+input[type="password"]::placeholder {
+    color: white;
+    opacity: 1;
+}
+
+/* Стили для сообщений об ошибках */
+.error-message {
+    color: #ff6b6b;
+    font-size: 14px;
+    margin-top: 5px;
+    text-align: left;
+    padding-left: 15px;
+}
+
+/* Стили для подсказок */
+.helptext {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: left;
+    padding-left: 15px;
+}
+
+.error-container {
+    height: 50px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.submit-btn {
+    margin-top: -30%;
+    background-color: white;
+    color: black;
+    border: none;
+    width: 100%;
+    padding: 13px;
+    border-radius: 30px;
+    font-size: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 20px; /* Увеличиваем отступ снизу для появления надписи */
+}
+
+.submit-btn:hover {
+    background-color: black;
+    color: white;
+}
+
+.login-section {
+    text-align: center; /* Обеспечиваем центрирование текста */
+}
+
+.login-link {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 5px; /* Уменьшаем отступ снизу */
+}
+
+.btn {
+    font-size: 16px;
+    text-decoration: underline;
+    color: white;
+}
+
+.btn:hover {
+    color: black;
+}
+
+/* Анимация */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main > * { /* Применяем анимацию ко всем дочерним элементам main */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.main > :nth-child(1) { animation-delay: 0.1s; }
+
+@media (max-width: 380px) {
+    .main {
+        margin-top: 70px;
+        padding: 15px;
+    }
+
+    .registration-form h1, .registration-form h2 {
+        font-size: 28px;
+    }
+
+    .form-control {
+        padding: 8px;
+    }
+
+    .submit-btn {
+        padding: 10px;
+        font-size: 18px;
+    }
+
+    .error-message {
+        font-size: 12px;
+    }
+
+    .login-link, .btn {
+        font-size: 14px;
+    }
+}
+
+.input-with-icon {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon svg {
+    position: absolute;
+    left: 15px;
+    color: white;
+    opacity: 0.8;
+}
+
+.input-with-icon input {
+    padding-left: 45px !important;
+}
+
+.field-label {
+    color: white;
+    font-size: 14px;
+    margin-top: 5px;
+    text-align: left;
+    padding-left: 15px;
+    opacity: 0.8;
+}
+
+/* Обновленные стили для полей пароля */
+input[type="password"] {
+    padding: 15px;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid white;
+    background-color: rgba(0, 0, 0, 0.0);
+    color: white;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="password"]:focus {
+    border-bottom-color: #66CDAA;
+}
+
+input[type="password"]::placeholder {
+    color: white;
+    opacity: 0.8;
+}
+
+/* Анимация для иконок при фокусе */
+.input-with-icon input:focus + svg {
+    color: #66CDAA;
+    opacity: 1;
+}
+</style>
+</body>
+</html>

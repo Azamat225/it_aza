@@ -1,0 +1,237 @@
+{% extends 'manager2/layout.html' %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление задачи</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/css_photo_list.css' %}">
+</head>
+<body>
+{% block content %}
+<main>
+    <h1 class="page-title">Добавить задачу</h1>
+
+    <div class="form-container">
+        <!-- Отображение изображения -->
+        {% if photo.image %}
+            <img src="{{ photo.image.url }}" alt="Фото макета" class="preview-image">
+        {% endif %}
+
+        <!-- Форма добавления задачи -->
+        <form action="" method="POST" class="task-form">
+            {% csrf_token %}
+
+            <!-- Выбор шаблона -->
+            <div class="form-group">
+                {{ form.template.label_tag }}
+                {{ form.template }}
+            </div>
+
+            <!-- Ручная отрисовка полей формы -->
+            <div class="form-group">
+                {{ form.title.label_tag }}
+                {{ form.title }}
+            </div>
+
+            <div class="form-group">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+            </div>
+
+            <div class="form-group">
+                {{ form.assigned_user.label_tag }}
+                {{ form.assigned_user }}
+            </div>
+
+            <div class="form-group">
+                {{ form.max_assigned_users.label_tag }}
+                {{ form.max_assigned_users }}
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="primary-button">Сохранить задачу</button>
+                <a href="{% url 'create_manager_task_template' %}?photo_id={{ photo.id }}" class="primary-button template-button">Создать шаблон</a>
+            </div>
+        </form>
+
+        <a href="{% url 'photo_detail' photo.id %}" class="secondary-button back-link">Назад</a>
+    </div>
+    <div style="height: 60px;"></div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const templateSelect = document.querySelector('#id_template');
+    const titleInput = document.querySelector('#id_title');
+    const descriptionInput = document.querySelector('#id_description');
+    const maxUsersInput = document.querySelector('#id_max_assigned_users');
+
+    templateSelect.addEventListener('change', function() {
+        if (this.value) {
+            // Получаем данные шаблона через AJAX
+            fetch(`/manager/get_template_data/${this.value}/`)
+                .then(response => response.json())
+                .then(data => {
+                    titleInput.value = data.title;
+                    descriptionInput.value = data.description;
+                    maxUsersInput.value = data.max_assigned_users;
+                });
+        } else {
+            // Очищаем поля при отмене выбора шаблона
+            titleInput.value = '';
+            descriptionInput.value = '';
+            maxUsersInput.value = '';
+        }
+    });
+});
+</script>
+
+<style>
+    /* Основные стили */
+    html, body {
+        font-family: 'Montserrat', sans-serif;
+        color: white;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+
+    main {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+    }
+
+    .form-container {
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .preview-image {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 1.5rem;
+        border-radius: 5px;
+    }
+
+    .task-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 90%;
+        padding: 0.8rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .form-group select {
+        width: 90%;
+        padding: 0.8rem;
+        background: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        color: black;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #007BFF;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .form-group select:focus {
+        outline: none;
+        border-color: #007BFF;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .primary-button {
+        background: white;
+        padding: 15px 10px;
+        border: none;
+        border-radius: 5px;
+        color: black;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        font-size: 16px;
+    }
+
+    .primary-button:hover {
+        background: black;
+        color: white;
+    }
+
+    .template-button {
+        background: #4CAF50;
+    }
+
+    .template-button:hover {
+        background: #45a049;
+    }
+
+    .secondary-button {
+        background: black;
+        padding: 15px 10px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 1rem;
+        transition: background 0.3s ease;
+    }
+
+    .secondary-button:hover {
+        background: white;
+        color: black;
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 1rem;
+        }
+
+        .task-form {
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}

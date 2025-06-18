@@ -1,0 +1,408 @@
+{% extends 'manager2/layout.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование задачи</title>
+    <link rel="stylesheet" href="{% static 'css/css_2.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+{% block content %}
+<div class="main">
+    <div class="container_app">
+        <div class="edit-task-header">
+            <h2>Редактирование задачи</h2>
+            <p class="task-subtitle">Макет: {{ photo.image_name }}</p>
+        </div>
+
+        <div class="edit-task-form">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_title">Название задачи</label>
+                    <input type="text" name="title" id="id_title" value="{{ task.title }}" required class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_description">Описание задачи</label>
+                    <textarea name="description" id="id_description" required class="form-control">{{ task.description }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Назначенные сотрудники</label>
+                    <div class="user-selector">
+                        <div class="selected-users">
+                            {% for user in task.assigned_users.all %}
+                            <div class="selected-user" data-user-id="{{ user.id }}">
+                                <span class="user-name">{{ user.full_name }}</span>
+                                <button type="button" class="remove-user" onclick="removeUser({{ user.id }})">×</button>
+                                <input type="hidden" name="assigned_users" value="{{ user.id }}">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="user-dropdown">
+                            <select id="user-select" class="form-control">
+                                <option value="">Выберите сотрудника</option>
+                                {% for user in users %}
+                                    {% if user not in task.assigned_users.all %}
+                                    <option value="{{ user.id }}" data-name="{{ user.full_name }}">
+                                        {{ user.full_name }} ({{ user.get_post_display }})
+                                    </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn-add-user" onclick="addUser()">Добавить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_status">Статус</label>
+                    <select name="status" id="id_status" class="form-control">
+                        <option value="new" {% if task.status == 'new' %}selected{% endif %}>Новая</option>
+                        <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>В работе</option>
+                        <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Завершена</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">Сохранить изменения</button>
+                    <a href="{% url 'photo_detail' photo.id %}" class="btn-cancel">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div style="height: 60px;">
+    </div>
+</div>
+
+<style>
+html, body {
+    overflow: hidden;
+    height: 100vh;
+    margin: 0;
+    color: white;
+    overflow-y: auto;
+}
+
+.main {
+    color: white;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.container_app {
+    width: 90%;
+    min-height: 600px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    margin: 20px auto;
+}
+
+.edit-task-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 20px;
+}
+
+.edit-task-header h2 {
+    color: #66CDAA;
+    margin: 0 0 10px 0;
+    font-size: 2em;
+}
+
+.task-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.edit-task-form {
+    max-width: 800px;
+    margin: 0 auto;
+    width: 85%;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #66CDAA;
+    font-size: 1.1em;
+}
+
+.form-control {
+    width: 90%;
+    padding: 12px;
+    border: 1px solid rgba(102, 205, 170, 0.3);
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #66CDAA;
+    box-shadow: 0 0 0 2px rgba(102, 205, 170, 0.2);
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+select.form-control {
+    cursor: pointer;
+    background-color: white;
+    color: black;
+}
+
+/* Стили для выбора пользователей */
+.user-selector {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(102, 205, 170, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.selected-users {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    min-height: 40px;
+}
+
+.selected-user {
+    background-color: #66CDAA;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+}
+
+.remove-user {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.remove-user:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.user-dropdown {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-add-user {
+    background-color: #66CDAA;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-add-user:hover {
+    background-color: #4CAF8F;
+    transform: translateY(-2px);
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn-save, .btn-cancel {
+    padding: 12px 20px;
+    width: 100%;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-cancel {
+    padding: 12px 20px;
+    width: 85%;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-save {
+    background-color: #66CDAA;
+    color: white;
+    border: none;
+}
+
+.btn-save:hover {
+    background-color: #4CAF8F;
+    transform: translateY(-2px);
+}
+
+.btn-cancel {
+    background-color: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main > * {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.main > :nth-child(1) { animation-delay: 0.1s; }
+
+/* Медиа-запросы */
+@media (max-width: 768px) {
+    .container_app {
+        padding: 15px;
+        margin: 10px auto;
+    }
+
+    .edit-task-form {
+        padding: 0 10px;
+    }
+
+    .user-dropdown {
+        flex-direction: column;
+    }
+
+    .btn-add-user {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+
+    .edit-task-header h2 {
+        font-size: 1.5em;
+    }
+}
+
+@media (max-width: 380px) {
+    .container_app {
+        margin: 5px auto;
+        padding: 10px;
+    }
+
+    .form-control {
+        padding: 8px;
+        font-size: 0.9em;
+    }
+
+    .selected-user {
+        font-size: 0.8em;
+        padding: 6px 10px;
+    }
+}
+</style>
+
+<script>
+function addUser() {
+    const select = document.getElementById('user-select');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (selectedOption.value) {
+        const userId = selectedOption.value;
+        const userName = selectedOption.getAttribute('data-name');
+        
+        // Проверяем, не добавлен ли уже этот пользователь
+        if (!document.querySelector(`.selected-user[data-user-id="${userId}"]`)) {
+            const selectedUsers = document.querySelector('.selected-users');
+            
+            // Создаем элемент выбранного пользователя
+            const userElement = document.createElement('div');
+            userElement.className = 'selected-user';
+            userElement.setAttribute('data-user-id', userId);
+            
+            userElement.innerHTML = `
+                <span class="user-name">${userName}</span>
+                <button type="button" class="remove-user" onclick="removeUser(${userId})">×</button>
+                <input type="hidden" name="assigned_users" value="${userId}">
+            `;
+            
+            selectedUsers.appendChild(userElement);
+            
+            // Удаляем опцию из селекта
+            select.remove(select.selectedIndex);
+            
+            // Сбрасываем селект
+            select.selectedIndex = 0;
+        }
+    }
+}
+
+function removeUser(userId) {
+    const userElement = document.querySelector(`.selected-user[data-user-id="${userId}"]`);
+    if (userElement) {
+        const userName = userElement.querySelector('.user-name').textContent;
+        
+        // Добавляем опцию обратно в селект
+        const select = document.getElementById('user-select');
+        const option = new Option(userName, userId);
+        option.setAttribute('data-name', userName);
+        select.add(option);
+        
+        // Удаляем элемент пользователя
+        userElement.remove();
+    }
+}
+</script>
+
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,459 @@
+{% extends 'users/layout.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracker</title>
+    <link rel="stylesheet" href="{% static 'css/css_2.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+</head>
+<body>
+{% block content %}
+<div class="main">
+    <div class="profile">
+        <p>
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+            </svg>
+        </p>
+        <div style="flex-direction: column;">
+            <h4>{{user.full_name}}</h4>
+            <div class="txt">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stars" viewBox="0 0 16 16">
+                    <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
+                </svg>
+                {{ user.get_post_display }}
+            </div>
+            <div class="stavka">
+                Ставка: {{user.stavka}}
+            </div>
+        </div>
+    </div>
+
+    <div class="container_app">
+        <div class="timer-container">
+            <div class="timer" id="timerDisplay">00:00:00</div>
+            <div class="salary" id="salaryDisplay">0 ₽</div>
+        </div>
+
+        <div class='mockup'>
+            {% if not timer_started %}
+                <div class="warning-message">
+                    <p><strong>Для начала работы необходимо запустить таймер смены</strong></p>
+                    <p><small>После запуска таймера вы сможете выбирать задачи</small></p>
+                </div>
+            {% else %}
+                <div class="task-info">
+                    {% if active_task %}
+                        <div class="task-item">
+                            <h3>Текущая задача</h3>
+                            <h4>{{ active_task.title }}</h4>
+                            <p>{{ active_task.description }}</p>
+                            {% if photo %}
+                                <div class="photo-info">
+                                    <p><strong>Макет:</strong> {{ photo.image_name }}</p>
+                                    <p><strong>ID макета:</strong> {{ photo.id }}</p>
+                                    <a href="{% url 'select_task_with_photo' photo.id %}" class="view-photo-btn">Выбрать другую задачу</a>
+                                </div>
+                            {% endif %}
+                            <p><strong>Статус:</strong> В работе</p>
+                        </div>
+                    {% else %}
+                        <div class="no-task-message">
+                            <p>У вас нет активной задачи</p>
+                            <a href="{% url 'task_list' %}" class="select-task-btn">Выбрать задачу</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="start-button">
+            {% if timer_started %}
+                <form action="{% url 'toggle_timer' %}" method="post" class="mt-3" id="timerForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Завершить смену</button>
+                </form>
+            {% else %}
+                <form action="{% url 'toggle_timer' %}" method="post" class="mt-3" id="timerForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Начать смену</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+html, body {
+    font-family: 'Montserrat', sans-serif;
+    overflow:hidden;
+    height: 100vh;
+    margin: 0;
+    color: white;
+    overflow-y: auto;
+}
+
+.main {
+    color: white;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+/* Верхняя панель */
+.profile {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid white;
+    padding: 5px;
+    height: 60px;
+    border-radius: 50px;
+    display: flex;
+    margin: 10px 10px 10px;
+    justify-content: flex-start;
+}
+
+.profile p {
+    width: 12%;
+    height: 80%;
+    border-radius: 50%;
+    border: 1px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto 5px auto;
+}
+
+.profile h4 {
+    margin: 0px;
+    white-space: nowrap;
+    padding: 0;
+    align-items: center;
+    text-align: center;
+}
+
+.profile .txt {
+    color: black;
+    border-radius: 20px;
+    border: 1px solid white;
+    background-color: white;
+    width: 100px;
+    height: 20px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    font-size: 15px;
+}
+
+.profile .stavka {
+    font-size: 12px;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
+/* Основной блок */
+.container_app {
+    width: 96%;
+    height: 700px;
+    padding: 0;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 20px auto -10px;
+}
+
+.timer {
+    font-size: 4em;
+    font-weight: bold;
+    margin: 0px 15px 0px;
+}
+
+.mockup {
+    border: 2px solid white;
+    padding: 5px;
+    width: 80%;
+    height: 300px;
+    border-radius: 40px;
+    margin: 0 auto 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 10px;
+}
+
+.mockup p {
+    font-size: 1.5em;
+    margin: 0px 10px 20px;
+    color: white;
+}
+
+.start-button {
+    background-color: rgba(0, 0, 0, 0.0);
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin: 20px auto;
+}
+
+button {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    font-size: 1.5em;
+    border: 4px solid #66CDAA;
+    background-color: rgba(0, 0, 0, 0.0);
+    color: white;
+    transition: background-color 0.3s, border-color 0.3s;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.salary {
+    color: transparent;
+    margin: 0% 0px -5%;
+}
+
+.warning-message {
+    background-color: rgba(255, 193, 7, 0.1);
+    border: 1px solid #ffc107;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px 0;
+}
+
+.task-info {
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.task-item {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    text-align: left;
+}
+
+.task-item h3 {
+    color: #66CDAA;
+    margin: 0 0 15px 0;
+    font-size: 1.4em;
+}
+
+.task-item h4 {
+    margin: 0 0 10px 0;
+    color: #66CDAA;
+}
+
+.task-item p {
+    margin: 5px 0;
+    font-size: 1.2em;
+}
+
+.photo-info {
+    background-color: rgba(102, 205, 170, 0.1);
+    border: 1px solid #66CDAA;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.view-photo-btn, .select-task-btn {
+    display: inline-block;
+    background-color: #66CDAA;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-top: 5px;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+}
+
+.view-photo-btn:hover, .select-task-btn:hover {
+    background-color: #4CAF8F;
+}
+
+.no-task-message {
+    text-align: center;
+    padding: 20px;
+}
+
+.no-task-message p {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+.select-task-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1.1em;
+}
+
+/* Дополнительные медиазапросы для меньших экранов */
+@media (max-width: 380px) {
+    .container_app {
+        height: 550px;
+        margin-bottom: -30px;
+        padding: -10px;
+    }
+    .timer {
+        font-size: 3em;
+    }
+    button {
+        width: 160px;
+        height: 160px;
+    }
+    .profile {
+        height: 50px;
+        margin-bottom: -15px;
+    }
+    .timer-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .mockup {
+        height: 230px;
+    }
+    .salary {
+        color: transparent;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main > * {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.main > :nth-child(1) { animation-delay: 0.1s; }
+.main > :nth-child(2) { animation-delay: 0.3s; }
+.main > :nth-child(3) { animation-delay: 0.5s; }
+.main > :nth-child(4) { animation-delay: 0.7s; }
+.main > :nth-child(5) { animation-delay: 0.9s; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const timerDisplay = document.getElementById('timerDisplay');
+    const salaryDisplay = document.getElementById('salaryDisplay');
+    const startButton = document.querySelector('.start-button button');
+    const timerForm = document.getElementById('timerForm');
+
+    let timerInterval = null;
+    let startTime = null;
+    const stavka = {{ user.stavka|default:0 }};
+
+    function updateTimer() {
+        if (!startTime) return;
+
+        const elapsedTime = Date.now() - startTime;
+        const hours = Math.floor(elapsedTime / 3600000);
+        const minutes = Math.floor((elapsedTime % 3600000) / 60000);
+        const seconds = Math.floor((elapsedTime % 60000) / 1000);
+
+        timerDisplay.textContent =
+            `${String(hours).padStart(2, '0')}:` +
+            `${String(minutes).padStart(2, '0')}:` +
+            `${String(seconds).padStart(2, '0')}`;
+
+        const salary = (elapsedTime / 3600000) * stavka;
+        salaryDisplay.textContent = `${Math.round(salary)} ₽`;
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        startTime = null;
+        timerDisplay.textContent = '00:00:00';
+        salaryDisplay.textContent = '0 ₽';
+    }
+
+    function checkTimerStatus() {
+        fetch('/api/check-active-timer/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.active) {
+                    startTime = Date.now() - data.elapsed_time * 1000;
+                    timerInterval = setInterval(updateTimer, 1000);
+                    startButton.textContent = 'Завершить смену';
+                    updateTimer();
+                } else {
+                    resetTimer();
+                    startButton.textContent = 'Начать смену';
+                }
+            });
+    }
+
+    // Проверяем статус таймера каждые 5 секунд
+    setInterval(checkTimerStatus, 5000);
+    checkTimerStatus();
+
+    timerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (timerInterval) {
+            fetch('/api/stop-timer/', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        resetTimer();
+                        startButton.textContent = 'Начать смену';
+                        // Обновляем страницу после остановки таймера
+                        setTimeout(() => window.location.reload(), 1000);
+                    }
+                });
+        } else {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+            startButton.textContent = 'Завершить смену';
+            updateTimer();
+            fetch('/api/start-timer/', { method: 'POST' })
+                .then(() => {
+                    // Обновляем страницу после запуска таймера
+                    setTimeout(() => window.location.reload(), 1000);
+                });
+        }
+    });
+});
+</script>
+
+{% endblock %}
+</body>
+</html>

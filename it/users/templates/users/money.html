@@ -1,0 +1,359 @@
+{% extends 'users/layout.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="main">
+    <div class="container_app">
+        <div class="history-header">
+            <div class="header-content">
+                <a href="{% url 'profile' %}" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                    </svg>
+                    Назад
+                </a>
+                <h2>История смен</h2>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <form method="get" class="filter-form">
+                <input type="month" name="month" value="{{ selected_month|date:'Y-m' }}" class="month-input">
+                <button type="submit" class="filter-btn">Показать</button>
+            </form>
+        </div>
+
+        <div class="history-content">
+            {% if time_entries %}
+                {% for entry in time_entries %}
+                <div class="shift-card">
+                    <div class="shift-header">
+                        <div class="shift-date">
+                            <i class="bi bi-calendar"></i>
+                            {{ entry.start_time|date:"d.m.Y" }}
+                        </div>
+                        <div class="shift-time">
+                            <i class="bi bi-clock"></i>
+                            <span class="time-display" data-start="{{ entry.start_time|date:'Y-m-d H:i:s' }}" data-end="{{ entry.end_time|date:'Y-m-d H:i:s' }}">
+                                {{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="shift-duration">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16">
+                            <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1zm2-13v1c0 .537-.12 1.045-.337 1.5h6.674c-.217-.455-.337-.963-.337-1.5V2zm0 12v-1c0-.537.12-1.045.337-1.5H3.663c.217.455.337.963.337 1.5v1z"/>
+                        </svg>
+                        {{ entry.duration|format_time }}
+                    </div>
+                    <div class="shift-salary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cash" viewBox="0 0 16 16">
+                            <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/>
+                            <path d="M0 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V6a2 2 0 0 1-2-2z"/>
+                        </svg>
+                        Заработок: {{ entry.salary|floatformat:2 }} ₽
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-history">
+                    <p>История смен пуста</p>
+                </div>
+            {% endif %}
+
+            <div class="summary">
+                <h2>Итого за период:</h2>
+                <p><strong>Общее время:</strong> {{ total_duration|format_time }}</p>
+                <p><strong>Общая зарплата:</strong> {{ total_salary|floatformat:2 }} ₽</p>
+            </div>
+        </div>
+    </div>
+    <div style="height: 100px;"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function updateTimeDisplays() {
+        const timeDisplays = document.querySelectorAll('.time-display');
+        const now = new Date();
+        
+        timeDisplays.forEach(display => {
+            const startTime = new Date(display.dataset.start);
+            const endTime = new Date(display.dataset.end);
+            
+            if (now < endTime && now >= startTime) {
+                // Если таймер активен, показываем текущее время
+                const elapsed = Math.floor((now - startTime) / 1000);
+                const hours = Math.floor(elapsed / 3600);
+                const minutes = Math.floor((elapsed % 3600) / 60);
+                const seconds = elapsed % 60;
+                
+                display.innerHTML = `${startTime.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})} - <span style="color: #66CDAA">${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}</span>`;
+            } else {
+                // Если таймер неактивен, показываем обычное время
+                display.innerHTML = `${startTime.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})}`;
+            }
+        });
+    }
+
+    // Обновляем время каждую секунду
+    setInterval(updateTimeDisplays, 1000);
+    updateTimeDisplays();
+});
+</script>
+
+<style>
+html, body {
+    overflow: hidden;
+    height: 100vh;
+    margin: 0;
+    color: white;
+    overflow-y: auto;
+}
+
+.main {
+    color: white;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.container_app {
+    width: 90%;
+    min-height: 600px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    margin: 20px auto;
+}
+
+.history-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 20px;
+}
+
+.history-header h2 {
+    color: #66CDAA;
+    margin: 0;
+    font-size: 2em;
+}
+
+.filter-section {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.filter-form {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.month-input {
+    padding: 10px;
+    border: none;
+    border-radius: 25px;
+    background-color: white;
+    color: black;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.filter-btn {
+    background-color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: black;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.filter-btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.history-content {
+    padding: 0 20px 20px;
+}
+
+.shift-card {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(102, 205, 170, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.shift-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 205, 170, 0.1);
+}
+
+.shift-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.shift-date, .shift-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #66CDAA;
+}
+
+.shift-duration, .shift-salary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #66CDAA;
+    margin-top: 10px;
+}
+
+.shift-salary {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-top: 15px;
+}
+
+.no-history {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2em;
+    padding: 40px 0;
+}
+
+.summary {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid rgba(102, 205, 170, 0.3);
+    border-radius: 12px;
+}
+
+.summary h2 {
+    color: #66CDAA;
+    margin-top: 0;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.summary p {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+strong {
+    font-weight: 500;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.shift-card {
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.shift-card:nth-child(1) { animation-delay: 0.1s; }
+.shift-card:nth-child(2) { animation-delay: 0.2s; }
+.shift-card:nth-child(3) { animation-delay: 0.3s; }
+.shift-card:nth-child(4) { animation-delay: 0.4s; }
+.shift-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Медиа-запросы */
+@media (max-width: 768px) {
+    .container_app {
+        margin: 10px auto;
+        padding: 10px;
+    }
+
+    .shift-card {
+        padding: 15px;
+    }
+
+    .history-header h2 {
+        font-size: 1.5em;
+    }
+}
+
+@media (max-width: 380px) {
+    .container_app {
+        margin: 5px auto;
+        padding: 5px;
+    }
+
+    .shift-card {
+        padding: 10px;
+    }
+
+    .history-header h2 {
+        font-size: 1.2em;
+    }
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #66CDAA;
+    text-decoration: none;
+    font-size: 1.1em;
+    transition: color 0.3s ease;
+}
+
+.back-button:hover {
+    color: #4CAF50;
+}
+
+.back-button svg {
+    transition: transform 0.3s ease;
+}
+
+.back-button:hover svg {
+    transform: translateX(-4px);
+}
+
+.time-display {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1em;
+}
+
+.time-display span {
+    font-weight: 500;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends 'director/layout.html' %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование макета</title>
+</head>
+<body>
+{% block content %}
+<main>
+    <h2 style="text-align: center;">Редактировать макет</h2>
+    <div class="form-container">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <!-- Поле: Название -->
+            <div class="form-group">
+                {{ form.image_name.label_tag }}
+                <input
+                    type="text"
+                    name="{{ form.image_name.name }}"
+                    class="form-control"
+                    placeholder="Введите название..."
+                    value="{{ form.image_name.value|default:'' }}"
+                    required
+                >
+            </div>
+
+            <!-- Поле: Описание -->
+            <div class="form-group">
+                {{ form.description.label_tag }}
+                <textarea
+                    name="{{ form.description.name }}"
+                    class="form-control large-textarea"
+                    placeholder="Введите описание для макета..."
+                    rows="6"
+                >{{ form.description.value|default:'' }}</textarea>
+            </div>
+
+            <!-- Поле: Требования -->
+            <div class="form-group">
+                {{ form.requirements.label_tag }}
+                <textarea
+                    name="{{ form.requirements.name }}"
+                    class="form-control"
+                    placeholder="Введите требования для макета..."
+                    rows="3"
+                >{{ form.requirements.value|default:'' }}</textarea>
+            </div>
+
+            <!-- Поле: Срок сдачи -->
+            <div class="form-group">
+                {{ form.due_date.label_tag }}
+                <input
+                    type="date"
+                    name="{{ form.due_date.name }}"
+                    class="form-control"
+                    value="{{ form.due_date.value|date:'Y-m-d'|default:'' }}"
+                >
+            </div>
+
+            <!-- Поле: Назначить менеджера -->
+            <div class="form-group">
+                {{ form.assigned_manager.label_tag }}
+                <select
+                    name="{{ form.assigned_manager.name }}"
+                    class="form-control select"
+                >
+                    {% for manager in form.assigned_manager.field.queryset %}
+                        <option value="{{ manager.id }}" {% if form.assigned_manager.value == manager.id %}selected{% endif %}>
+                            {{ manager.full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        </form>
+
+        <form method="post" action="{% url 'delete_photo' photo.id %}" class="delete-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Удалить макет?')">Удалить макет</button>
+        </form>
+        <a href="{% url 'task_list_director' %}" class="btn cancel-btn">Отмена</a>
+    </div>
+    <div class="empty">
+
+    </div>
+</main>
+
+<style>
+body {
+    font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+    color: white;
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    overflow-y: auto;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+.form-container {
+    margin: auto;
+    width: 90%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 6px -4px 20px -2px rgba(0, 0, 0, 0.4);
+}
+
+.form-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.form-control {
+    width: 100%;
+    margin-top: 15px;
+    border: none;
+    border-bottom: 1px solid white;
+    background-color: transparent;
+    color: white;
+    padding: 5px;
+}
+
+input[type="date"] {
+    width: 100%;
+    padding: 10px 0px;
+}
+
+.select {
+    background-color: white;
+    color: black;
+}
+
+.btn {
+    background-color: white;
+    color: black;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 30px;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: black;
+    color: white;
+}
+
+.btn-danger {
+    background-color: red;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #cc0000;
+    color: white;
+}
+
+.cancel-btn {
+    display: inline-block;
+    margin-top: 20px;
+    background-color: black; /* Красный */
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 50px;
+    font-weight: bold;
+    width: 93%;
+    text-align: center;
+}
+
+.cancel-btn:hover {
+    background-color: white; /* Более темный красный */
+    color: black;
+}
+
+.empty {
+    height: 70px;
+}
+
+    /* Анимация */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+main > * { /* Применяем анимацию ко всем дочерним элементам main */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.5s ease forwards;
+}
+
+main > :nth-child(1) { animation-delay: 0.1s; }
+main > :nth-child(2) { animation-delay: 0.3s; }
+main > :nth-child(3) { animation-delay: 0.5s; }
+main > :nth-child(4) { animation-delay: 0.7s; }
+main > :nth-child(5) { animation-delay: 0.9s; }
+
+</style>
+{% endblock %}
+</body>
+</html>

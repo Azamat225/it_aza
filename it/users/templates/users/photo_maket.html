@@ -1,0 +1,147 @@
+{% extends 'users/layout.html' %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задачи и Макеты</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/css_zadachi.css' %}">
+</head>
+<body>
+{% block content %}
+<main>
+    <h1 style="text-align: center;">Актуальные макеты</h1>
+    <!-- Отображение фотографий -->
+    <div class="photo-display">
+        {% if photos %}
+        {% for photo in photos %}
+        {% if not photo.is_completed %}
+        <div class="photo-container">
+            <!-- Само изображение -->
+            <img src="{{ photo.image.url }}" alt="Фото" class="photo">
+            <!-- Описание макета -->
+            <div class="description-container">
+                <p><strong>Процент завершения:</strong> {{ photo.completion_percentage|floatformat:0 }}%</p>
+                <p><strong>Название макета:</strong>{{ photo.image_name }}</p>
+                <p><strong>Описание макета:</strong>{{ photo.description }}<p>
+                <!-- Кнопка "Подробнее" -->
+                <a href="{% url 'maket_info' photo.id %}" class="btn btn-primary">Подробнее</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <div class="no-photo-message">Актуальные Макеты отсутствуют</div>
+        {% endif %}
+        </div>
+
+    <div class="empty">
+
+    </div>
+</main>
+
+<style>
+body {
+    font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+    margin: 0;
+    color: white;
+}
+
+main {
+    height: 100vh; /* Высота экрана на 100% для полного центрирования */
+    font-size: 10px;
+    overflow-y: auto;
+    display: flex;
+    justify-content: flex-start; /* Центровка контейнера */
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-size: 28px;
+}
+
+.photo-display {
+    display: flex;
+    flex-wrap: wrap; /* Позволяет элементам переноситься на следующую строку */
+    justify-content: center; /* Центровка контейнера */
+}
+
+.description-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* Изменено на 100% для мобильных устройств */
+    padding: 10px; /* Добавлен отступ для мобильных устройств */
+    font-size:13px;
+}
+
+.photo {
+    box-shadow: 6px -4px 24px -2px rgba(0, 0, 0, 0.4);
+    padding-top: 5px;
+    width: 90%;
+    height:90%;
+    border-radius: 10px; /* Добавлено округление углов для изображений */
+}
+
+.photo-container {
+    text-align: center;
+    width: 47%; /* Изменено значение на 45% для отображения двух фотографий в ряд */
+    height: auto; /* Высота устанавливается автоматически */
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center; /* Центровка ставки по вертикали */
+    margin: 3px; /* Удален нижний отступ для лучшего размещения */
+}
+
+.btn-primary {
+    width: auto; /* Изменено на авто для кнопки */
+    padding: 10px 0; /* Отображение кнопки на всю ширину */
+    border: none;
+    border-radius: 45px;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px;
+}
+
+.empty{
+height:100px
+}
+
+/* Анимация */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .photo-display > * {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+    .photo-display > :nth-child(1) { animation-delay: 0.1s; }
+    .photo-display > :nth-child(2) { animation-delay: 0.3s; }
+    .photo-display > :nth-child(3) { animation-delay: 0.5s; }
+    .photo-display > :nth-child(4) { animation-delay: 0.7s; }
+    .photo-display > :nth-child(5) { animation-delay: 0.9s; }
+
+</style>
+{% endblock %}
+</body>
+</html>
