@@ -104,11 +104,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return dict(self.USER_TYPE_CHOICES).get(self.post_user)
 
     def is_expired(self):
-        """Проверяет, истек ли срок действия кода подтверждения."""
         if self.confirmation_sent_at:
-            expiration_time = self.confirmation_sent_at + timedelta(days=1)
+            expiration_time = self.confirmation_sent_at + timedelta(days=1)  # Код действителен 1 день
             return expiration_time < timezone.now()
-        return True
+        return True  # Если confirmation_sent_at нет, считаем, что код истек.
 
     @property
     def average_rating(self):

@@ -27,49 +27,30 @@ from django.core.mail import send_mail
 import random
 import string
 
+
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False
+            user.is_active = False  # Делаем аккаунт неактивным до подтверждения
             user.confirmation_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
             user.save()
 
-            email = form.cleaned_data.get('email')
-            if not email:
-                messages.error(request, 'Email не может быть пустым')
-                return render(request, 'users/register.html', {'form': form})
-
-            # Отправка кода на почту
+            # Отправка кода подтверждения на e-mail
             try:
-                subject = 'Код подтверждения регистрации'
-                message = f'Ваш код подтверждения: {user.confirmation_code}'
-                from_email = settings.DEFAULT_FROM_EMAIL
-                recipient_list = [email]
-
-                if not from_email:
-                    raise ValueError('DEFAULT_FROM_EMAIL не настроен в settings.py')
-
                 send_mail(
-                    subject,
-                    message,
-                    from_email,
-                    recipient_list,
+                    'Код подтверждения регистрации',
+                    f'Ваш код подтверждения: {user.confirmation_code}',
+                    settings.DEFAULT_FROM_EMAIL,  # Используем DEFAULT_FROM_EMAIL
+                    [form.cleaned_data.get('email')],
                     fail_silently=False,
                 )
-                print(f'[DEBUG] Код подтверждения: {user.confirmation_code}')
-                print(f'[DEBUG] Отправка на email: {email}')
-
-                messages.success(request, 'Код подтверждения отправлен на вашу почту. Введите его для завершения регистрации.')
+                messages.success(request, 'Пожалуйста, проверьте свой email для подтверждения.')
                 return redirect('confirm')
-
             except Exception as e:
-                print(f"[EMAIL ERROR]: {str(e)}")
-                print(f"[DEBUG] Traceback: {traceback.format_exc()}")
-                messages.error(request, 'Не удалось отправить письмо. Пожалуйста, проверьте правильность email адреса и попробуйте позже.')
+                messages.error(request, f'Ошибка при отправке email: {str(e)}')
                 return render(request, 'users/register.html', {'form': form})
-
     else:
         form = CustomUserCreationForm()
 
